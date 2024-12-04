@@ -1,0 +1,436 @@
+[
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "2pts succes",
+        "minute": 0
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Coby White",
+        "description": "free throw try",
+        "minute": 2
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Max trus",
+        "description": "3pts succes",
+        "minute": 4
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Chris Duarte",
+        "description": "2pts succes",
+        "minute": 4
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Jaylon Tyson",
+        "description": "free throw try",
+        "minute": 6
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Josh Giddey",
+        "description": "3pts try",
+        "minute": 8
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "2pts try",
+        "minute": 9
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "free throw succes",
+        "minute": 10
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Max trus",
+        "description": "2pts succes",
+        "minute": 10
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Jaylon Tyson",
+        "description": "3pts try",
+        "minute": 11
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "2pts try",
+        "minute": 13
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "2pts succes",
+        "minute": 14
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Evan Mobley",
+        "description": "free throw try",
+        "minute": 14
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Lonzo Ball",
+        "description": "3pts try",
+        "minute": 14
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "2pts succes",
+        "minute": 15
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Max trus",
+        "description": "2pts succes",
+        "minute": 16
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "free throw try",
+        "minute": 16
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "2pts try",
+        "minute": 18
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Jaylon Tyson",
+        "description": "free throw try",
+        "minute": 19
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "free throw try",
+        "minute": 20
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "3pts try",
+        "minute": 22
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Chris Duarte",
+        "description": "foul",
+        "minute": 24
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Coby White",
+        "description": "foul",
+        "minute": 26
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Evan Mobley",
+        "description": "foul",
+        "minute": 26
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "free throw succes",
+        "minute": 28
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Max trus",
+        "description": "2pts succes",
+        "minute": 30
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "2pts succes",
+        "minute": 31
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Jaylon Tyson",
+        "description": "2pts try",
+        "minute": 31
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Lonzo Ball",
+        "description": "3pts succes",
+        "minute": 31
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Josh Giddey",
+        "description": "free throw succes",
+        "minute": 31
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Chris Duarte",
+        "description": "2pts succes",
+        "minute": 32
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Josh Giddey",
+        "description": "3pts try",
+        "minute": 34
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Chris Duarte",
+        "description": "3pts try",
+        "minute": 35
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Coby White",
+        "description": "foul",
+        "minute": 35
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "3pts try",
+        "minute": 35
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Max trus",
+        "description": "2pts succes",
+        "minute": 36
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Chris Duarte",
+        "description": "2pts try",
+        "minute": 38
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Evan Mobley",
+        "description": "2pts succes",
+        "minute": 38
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "3pts try",
+        "minute": 40
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "foul",
+        "minute": 41
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Max trus",
+        "description": "foul",
+        "minute": 43
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Lonzo Ball",
+        "description": "3pts try",
+        "minute": 45
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Max trus",
+        "description": "2pts succes",
+        "minute": 46
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "2pts try",
+        "minute": 46
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "free throw succes",
+        "minute": 46
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Evan Mobley",
+        "description": "free throw try",
+        "minute": 46
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "free throw try",
+        "minute": 48
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Chris Duarte",
+        "description": "3pts succes",
+        "minute": 49
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Evan Mobley",
+        "description": "2pts succes",
+        "minute": 49
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Coby White",
+        "description": "2pts try",
+        "minute": 49
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Josh Giddey",
+        "description": "foul",
+        "minute": 51
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Josh Giddey",
+        "description": "foul",
+        "minute": 53
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "free throw try",
+        "minute": 54
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "2pts succes",
+        "minute": 55
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Chris Duarte",
+        "description": "2pts succes",
+        "minute": 55
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Jaylon Tyson",
+        "description": "foul",
+        "minute": 55
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Coby White",
+        "description": "foul",
+        "minute": 57
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "Bulls",
+        "playername": "Marcus Domask",
+        "description": "2pts try",
+        "minute": 58
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Evan Mobley",
+        "description": "3pts try",
+        "minute": 58
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "3pts succes",
+        "minute": 58
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Ty Jerome",
+        "description": "3pts succes",
+        "minute": 59
+    },
+    {
+        "gameposter": "Bulls_cavaliers",
+        "team": "cavaliers",
+        "playername": "Caris Levert",
+        "description": "3pts succes",
+        "minute": 59
+    }
+]
