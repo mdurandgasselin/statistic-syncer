@@ -19,11 +19,6 @@ type DBWrapper struct {
 	cachePlayerID    map[string]int
 }
 
-type QueueWrapper struct {
-	queueChannel *amqp.Channel
-	cache        map[string]bool
-}
-
 var (
 	rabbitQueuePort = flag.Int("rabbitQueuePort", 5672, "The rabbitMQ port")
 )
@@ -35,7 +30,6 @@ func main() {
 		cachePlayerID:    make(map[string]int),
 	}
 	db.initDB()
-	// create the player statistic table.
 
 	connection, err := amqp.Dial(fmt.Sprintf("amqp://guest:guest@localhost:%d/", *rabbitQueuePort))
 	if err != nil {
@@ -44,39 +38,12 @@ func main() {
 	defer connection.Close()
 	ut.Info("Successfully connected to RabbitMQ instance")
 
-	// opening a channel over the connection established to interact with RabbitMQ
 	channel, err := connection.Channel()
 	if err != nil {
 		panic(err)
 	}
 	defer channel.Close()
-
-	// Create a queue if it does not exist.
-	_, err = channel.QueueDeclare(
-		"LiveGame", // name
-		false,      // durable
-		false,      // auto delete
-		false,      // exclusive
-		false,      // no wait
-		nil,        // args
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	// Placeholder to receive messages from live games.
-	msgs, err := channel.Consume(
-		"LiveGame", // queue
-		"",         // consumer
-		true,       // auto ack
-		false,      // exclusive
-		false,      // no local
-		false,      // no wait
-		nil,        //args
-	)
-	if err != nil {
-		panic(err)
-	}
+	msgs := initQueue(channel, "LiveGame")
 
 	var action sp.Action
 	for msg := range msgs {
@@ -91,6 +58,35 @@ func main() {
 	}
 }
 
+func initQueue(channel *amqp.Channel, queueName string) <-chan amqp.Delivery {
+	// create if does not exist
+	_, err := channel.QueueDeclare(
+		queueName,
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	msgs, err := channel.Consume(
+		queueName,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		panic(err)
+	}
+	return msgs
+}
+
 func (db *DBWrapper) initDB() {
 	tableName := "playerStatistic"
 	query := fmt.Sprintf("SELECT name FROM sqlite_master WHERE type='table' AND name='%s';", tableName)
@@ -101,7 +97,7 @@ func (db *DBWrapper) initDB() {
 		// We initialize the cache with values present in the tables
 		mapping := db.queryPlayerIdMap()
 		db.cachePlayerID = mapping
-	} else {
+	} else {	// The table does not exist
 		if err == sql.ErrNoRows {
 			ut.Infof("Table %s does not exist. So it is created.\n", tableName)
 			query := `CREATE TABLE IF NOT EXISTS playerStatistic (
