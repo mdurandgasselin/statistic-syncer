@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 
 	sp "sync_score/sport"
 	ut "sync_score/utils"
@@ -37,7 +36,6 @@ func main() {
 	}
 	db.initDB()
 	// create the player statistic table.
-	
 
 	connection, err := amqp.Dial(fmt.Sprintf("amqp://guest:guest@localhost:%d/", *rabbitQueuePort))
 	if err != nil {
@@ -66,7 +64,7 @@ func main() {
 		panic(err)
 	}
 
-	// declaring a consumer with its properties over channel opened
+	// Placeholder to receive messages from live games.
 	msgs, err := channel.Consume(
 		"LiveGame", // queue
 		"",         // consumer
@@ -85,41 +83,24 @@ func main() {
 		if err := json.Unmarshal(msg.Body, &action); err != nil {
 			panic(err)
 		}
-		ut.Infof("Game: %s \n \t Team: %s \n \t name of the player: %s \n \t description: %s \n \t time in minute: %d \n",
+		ut.Debugf("Game: %s \n \t Team: %s \n \t name of the player: %s \n \t description: %s \n \t time in minute: %d \n",
 			action.GamePoster, action.Team, action.PlayerName, action.Description, action.Minute)
-		// send to DB for later update
-		db.sendToDb(action)
 		
-		// Send to queue to keep update on live statistic
-		db.compile(action)
+		db.sendToTables(action)
+		
 	}
 }
 
 func (db *DBWrapper) initDB() {
-	// Check if 
 	tableName := "playerStatistic"
-    query := fmt.Sprintf("SELECT name FROM sqlite_master WHERE type='table' AND name='%s';", tableName)
-    var name string
-    err := db.clientDB.QueryRow(query).Scan(&name)
-    if err == nil {
-		ut.Infof("Table %s exists.\n", tableName)
+	query := fmt.Sprintf("SELECT name FROM sqlite_master WHERE type='table' AND name='%s';", tableName)
+	var name string
+	err := db.clientDB.QueryRow(query).Scan(&name)
+	if err == nil {   // The table exist
+		ut.Debugf("Table %s exists.\n", tableName)
 		// We initialize the cache with values present in the tables
-		query := `SELECT id, playerName FROM playerStatistic;`
-		rows, err := db.clientDB.Query(query)
-		if err != nil {
-			ut.Debug(err)
-			ut.Fatal(err)
-		}
-		defer rows.Close()
-		var id int
-		var playerName string
-		for rows.Next() {
-			if err := rows.Scan(&id, &playerName); err != nil {
-				fmt.Println(err)
-				ut.Fatal(err)
-			}
-			db.cachePlayerID[playerName] = id
-		}
+		mapping := db.queryPlayerIdMap()
+		db.cachePlayerID = mapping
 	} else {
 		if err == sql.ErrNoRows {
 			ut.Infof("Table %s does not exist. So it is created.\n", tableName)
@@ -142,12 +123,31 @@ func (db *DBWrapper) initDB() {
 			fmt.Println(err)
 			ut.Fatal(err)
 		}
-		return
 	}
-
 }
 
-func (db DBWrapper) compile(action sp.Action) {
+func (db *DBWrapper) queryPlayerIdMap() map[string]int {
+	mapping := make(map[string]int)
+	query := `SELECT id, playerName FROM playerStatistic;`
+	rows, err := db.clientDB.Query(query)
+	if err != nil {
+		ut.Debug(err)
+		ut.Fatal(err)
+	}
+	defer rows.Close()
+	var id int
+	var playerName string
+	for rows.Next() {
+		if err := rows.Scan(&id, &playerName); err != nil {
+			fmt.Println(err)
+			ut.Fatal(err)
+		}
+		mapping[playerName] = id
+	}
+	return mapping
+}
+
+func (db DBWrapper) addPlayerStat(action sp.Action) {
 	fmt.Println(action.Description)
 	id, ok := db.cachePlayerID[action.PlayerName]
 	if !ok {
@@ -205,48 +205,25 @@ func (db DBWrapper) compile(action sp.Action) {
 
 }
 
-func (q QueueWrapper) sendToQueue(action sp.Action) {
-	var err error
-	if !q.cache[action.GamePoster] {
-		// Create a queue if it does not exist.
-		_, err = q.queueChannel.QueueDeclare(
-			action.GamePoster, // name
-			false,             // durable
-			false,             // auto delete
-			false,             // exclusive
-			false,             // no wait
-			nil,               // args
-		)
-		if err != nil {
-			panic(err)
-		}
-		q.cache[action.GamePoster] = true
-	}
-	// publishing a message
-	body, _ := json.Marshal(action)
-	err = q.queueChannel.Publish(
-		"",                // exchange
-		action.GamePoster, // key
-		false,             // mandatory
-		false,             // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        body,
-		},
-	)
-	if err != nil {
-		log.Fatalf("could not publish: %v", err)
-	}
+func (db *DBWrapper) sendToTables(action sp.Action) {
+	// Log the received event
+	// create the table for a particular game: teamA_teamB, TODO: could add a date after on the table name
+	// add the element
+	// TODO: use placeholder ?
+	db.addEntryToPerGameTable(action)
+
+	// Send to tables for players statistic.
+	db.addPlayerStat(action)
+
 }
 
-func (db *DBWrapper) sendToDb(action sp.Action) {
-	// Log the received event
-	ut.Infof("Received event: Game=%s, Team=%s, Player=%s, Description=%s, Time=%d",
+func (db *DBWrapper) addEntryToPerGameTable(action sp.Action) {
+	ut.Debugf("Received event: Game=%s, Team=%s, Player=%s, Description=%s, Time=%d",
 		action.GamePoster, action.Team, action.PlayerName, action.Description, action.Minute)
 
 	var query string
 	if !db.cachedTableNames[action.GamePoster] {
-		// create the table for particule game: teamA_teamB
+
 		query = fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
 				team STRING,
 				playerName STRING,
@@ -261,10 +238,9 @@ func (db *DBWrapper) sendToDb(action sp.Action) {
 		db.cachedTableNames[action.GamePoster] = true
 	}
 
-	// add the element
 	query = fmt.Sprintf(`INSERT INTO %s (team, playerName, description, minute) 
 		VALUES ('%s', '%s', '%s', %d);`, action.GamePoster, action.Team, action.PlayerName, action.Description, action.Minute)
-	// TODO: use placeholder ?
+
 	_, err := db.clientDB.Exec(query)
 	if err != nil {
 		ut.Fatal(err)
