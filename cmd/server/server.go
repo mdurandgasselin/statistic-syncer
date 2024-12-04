@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"context"
+	"time"
 
-	sp "sync_score/sport"
 	pb "sync_score/proto"
+	sp "sync_score/sport"
 	ut "sync_score/utils"
 
 	_ "github.com/mattn/go-sqlite3" // SQLite driver
@@ -36,6 +37,17 @@ func main() {
 		cachePlayerID:    make(map[string]int),
 	}
 	db.initDB()
+	// Set up connection using DialContext and UseClient
+	conn, err := grpc.NewClient("localhost:50051",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		ut.Fatalf("Failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	clientDBRPC := pb.NewGameCenterClient(conn)
+
 
 	connection, err := amqp.Dial(fmt.Sprintf("amqp://guest:guest@localhost:%d/", *rabbitQueuePort))
 	if err != nil {
@@ -52,6 +64,7 @@ func main() {
 	msgs := initQueue(channel, "LiveGame")
 
 	var action sp.Action
+	
 	for msg := range msgs {
 		if err := json.Unmarshal(msg.Body, &action); err != nil {
 			panic(err)
@@ -60,6 +73,22 @@ func main() {
 			action.GamePoster, action.Team, action.PlayerName, action.Description, action.Minute)
 		
 		db.sendToTables(action)
+		event := &pb.Action{
+			GamePoster:  action.GamePoster,
+			Team:        action.Team,
+			PlayerName:  action.PlayerName,
+			Description: action.Description,
+			Minute:      action.Minute,
+		}
+		
+		// Send event to server
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		response, err := clientDBRPC.SendGameAction(ctx, event)
+		if err != nil {
+			ut.Fatalf("Error sending event: %v", err)
+		}
+		ut.Debug(response.Status)
 		
 	}
 }
