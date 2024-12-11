@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Stream Example</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const eventSource = new EventSource("/stream");
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                document.getElementById("currentTime").innerText = data.currentTime;
+                document.getElementById("gameName").innerText = data.gameName;
+                document.getElementById("teamAScore").innerText = data.teamAScore;
+                document.getElementById("teamBScore").innerText = data.teamBScore;
+            };
+        });
+    </script>
+</head>
+<body>
+    <h1>Data Stream Example</h1>
+    <div>
+        <strong>Current Time:</strong> <span id="currentTime">Loading...</span>
+    </div>
+    <div>
+        <strong>Game Name:</strong> <span id="gameName">Loading...</span>
+    </div>
+    <div>
+        <strong>Team A Score:</strong> <span id="teamAScore">Loading...</span>
+    </div>
+    <div>
+        <strong>Team B Score:</strong> <span id="teamBScore">Loading...</span>
+    </div>
+</body>
+</html>
