@@ -13,6 +13,14 @@
                 document.getElementById("gameName").innerText = data.gameName;
                 document.getElementById("teamAScore").innerText = data.teamAScore;
                 document.getElementById("teamBScore").innerText = data.teamBScore;
+
+                const actionsList = document.getElementById("actions");
+                actionsList.innerHTML = ""; // Clear previous actions
+                data.actions.forEach(action => {
+                    const listItem = document.createElement("li");
+                    listItem.innerText = `${action.team} ${action.playerName}: ${action.descriptionOfAction} - ${action.isSuccess ? "Success" : "Fail"}`;
+                    actionsList.appendChild(listItem);
+                });
             };
         });
     </script>
@@ -30,6 +38,12 @@
     </div>
     <div>
         <strong>Team B Score:</strong> <span id="teamBScore">Loading...</span>
+    </div>
+    <div>
+        <strong>Actions:</strong>
+        <ul id="actions">
+            <li>Loading...</li>
+        </ul>
     </div>
 </body>
 </html>
