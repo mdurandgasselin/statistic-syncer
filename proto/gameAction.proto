@@ -24,6 +24,16 @@ package score;
 // The greeting service definition.
 service GameCenter {
     rpc SendGameAction (Action) returns (ActionReply) {}
+
+    rpc GetGameRecord (GameTitle) returns (Actions) {}
+}
+
+message GameTitle {
+  string gamePoster=1;
+}
+
+message Actions {
+  repeated Action elements= 1;
 }
 
 message Action {

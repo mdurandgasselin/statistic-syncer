@@ -3,24 +3,25 @@ package main
 import (
 	"context"
 	_ "database/sql"
+	"fmt"
 	_ "fmt"
 	"log"
 	"net"
 
+	database "sync_score/cmd/database/db"
 	pb "sync_score/proto" // Update with your actual proto package path
 	sp "sync_score/sport"
 	ut "sync_score/utils"
-	database "sync_score/cmd/database/db"
 
 	"google.golang.org/grpc"
 )
 
-type gameEventServer struct {
+type GameEventServer struct {
 	pb.UnimplementedGameCenterServer
 	db database.DBWrapper
 }
 
-func (s *gameEventServer) SendGameAction(ctx context.Context, event *pb.Action) (*pb.ActionReply, error) {
+func (s *GameEventServer) SendGameAction(ctx context.Context, event *pb.Action) (*pb.ActionReply, error) {
 	// Log the received event
 	ut.Debugf("Received event: Game=%s, Team=%s, Player=%s, Description=%s, Time=%d",
 		event.GamePoster, event.Team, event.PlayerName, event.Description, event.Minute)
@@ -37,6 +38,44 @@ func (s *gameEventServer) SendGameAction(ctx context.Context, event *pb.Action) 
 	return &pb.ActionReply{Status: "received"}, nil
 }
 
+func (s *GameEventServer) GetGameRecord(ctx context.Context, event *pb.GameTitle) (*pb.Actions, error) {
+	query := fmt.Sprintf(`SELECT * FROM %s;`, event.GamePoster)
+
+	rows, err := s.db.ClientDB.Query(query)
+	if err != nil {
+		ut.Debug(err)
+		ut.Fatal(err)
+	}
+	defer rows.Close()
+	// Extract Value
+	var actions pb.Actions
+	var team, playerName, description string
+	var minute int32
+	for rows.Next() {
+		if err := rows.Scan(&team, &playerName, &description, &minute); err != nil {
+			ut.Fatal(err)
+		}
+		actions.Elements = append(actions.Elements, &pb.Action{
+			GamePoster:  event.GamePoster,
+			Team:        team,
+			PlayerName:  playerName,
+			Description: description,
+			Minute:      minute})
+	}
+
+	return &actions, nil
+}
+
+func GetGameEventServer(dbName string) *GameEventServer {
+	db := database.NewDBWrapper(dbName)
+	t := &GameEventServer{db: db}
+	return t
+}
+
+func PrintSomething() {
+	fmt.Println("Something")
+}
+
 func main() {
 	// Create a listener on TCP port
 	lis, err := net.Listen("tcp", ":50051")
@@ -47,10 +86,10 @@ func main() {
 	// Create a gRPC server object
 	grpcServer := grpc.NewServer()
 
-	db := database.NewDBWrapper()
+	// db := database.NewDBWrapper()
 
-	// Attach the GameCenterService implementation
-	pb.RegisterGameCenterServer(grpcServer, &gameEventServer{db: db})
+	// Attach the GameCenterService implementation  TODO NewServer
+	pb.RegisterGameCenterServer(grpcServer, GetGameEventServer("./games.db"))
 
 	// Start serving
 	log.Println("Starting gRPC server on port 50051...")

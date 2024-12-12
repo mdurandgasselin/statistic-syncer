@@ -11,14 +11,14 @@ import (
 )
 
 type DBWrapper struct {
-	clientDB         *sql.DB
+	ClientDB         *sql.DB
 	cachedTableNames map[string]bool
 	cachePlayerID    map[string]int
 }
 
-func NewDBWrapper() DBWrapper{
+func NewDBWrapper(dbName string) DBWrapper{
 	db := DBWrapper{
-		clientDB:         getSQLDB(),
+		ClientDB:         getSQLDB(dbName),
 		cachedTableNames: make(map[string]bool),
 		cachePlayerID:    make(map[string]int),
 	}
@@ -30,7 +30,7 @@ func (db *DBWrapper) initDB() {
 	tableName := "playerStatistic"
 	query := fmt.Sprintf("SELECT name FROM sqlite_master WHERE type='table' AND name='%s';", tableName)
 	var name string
-	err := db.clientDB.QueryRow(query).Scan(&name)
+	err := db.ClientDB.QueryRow(query).Scan(&name)
 	if err == nil { // The table exist
 		ut.Debugf("Table %s exists.\n", tableName)
 		// We initialize the cache with values present in the tables
@@ -50,7 +50,7 @@ func (db *DBWrapper) initDB() {
 				freeThrowSuccess INTEGER,
 				foul INTEGER
 			);`
-			_, err := db.clientDB.Exec(query)
+			_, err := db.ClientDB.Exec(query)
 			if err != nil {
 				fmt.Println(err)
 				ut.Fatal(err)
@@ -67,7 +67,7 @@ func (db *DBWrapper) initDB() {
 func (db *DBWrapper) queryPlayerIdMap() map[string]int {
 	mapping := make(map[string]int)
 	query := `SELECT id, playerName FROM playerStatistic;`
-	rows, err := db.clientDB.Query(query)
+	rows, err := db.ClientDB.Query(query)
 	if err != nil {
 		ut.Debug(err)
 		ut.Fatal(err)
@@ -91,7 +91,7 @@ func (db DBWrapper) addPlayerStat(action sp.Action) {
 	if !ok {
 		query := `INSERT INTO playerStatistic (playerName, twoPointTry, twoPointSuccess, threePointTry, threePointSuccess, freeThrowTry, freeThrowSuccess, foul)
 				  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-		result, err := db.clientDB.Exec(query, action.PlayerName, 0, 0, 0, 0, 0, 0, 0)
+		result, err := db.ClientDB.Exec(query, action.PlayerName, 0, 0, 0, 0, 0, 0, 0)
 		if err != nil {
 			fmt.Println(err)
 			panic(err)
@@ -110,28 +110,28 @@ func (db DBWrapper) addPlayerStat(action sp.Action) {
 	switch action.Description {
 	case "2pts try":
 		updateSQL := `UPDATE playerStatistic SET twoPointTry = twoPointTry + ? WHERE id = ?`
-		_, err := db.clientDB.Exec(updateSQL, 1, id)
+		_, err := db.ClientDB.Exec(updateSQL, 1, id)
 		if err != nil {
 			fmt.Println(err)
 			ut.Fatal(err)
 		}
 	case "2pts succes":
 		updateSQL := `UPDATE playerStatistic SET twoPointTry = twoPointTry + ?, twoPointSuccess = twoPointSuccess + ? WHERE id = ?`
-		_, err := db.clientDB.Exec(updateSQL, 1, 1, id)
+		_, err := db.ClientDB.Exec(updateSQL, 1, 1, id)
 		if err != nil {
 			fmt.Println(err)
 			ut.Fatal(err)
 		}
 	case "3pts try":
 		updateSQL := `UPDATE playerStatistic SET threePointTry = threePointTry + ? WHERE id = ?`
-		_, err := db.clientDB.Exec(updateSQL, 1, id)
+		_, err := db.ClientDB.Exec(updateSQL, 1, id)
 		if err != nil {
 			fmt.Println(err)
 			ut.Fatal(err)
 		}
 	case "3pts succes":
 		updateSQL := `UPDATE playerStatistic SET threePointTry = threePointTry + ?, threePointSuccess = threePointSuccess + ? WHERE id = ?`
-		_, err := db.clientDB.Exec(updateSQL, 1, 1, id)
+		_, err := db.ClientDB.Exec(updateSQL, 1, 1, id)
 		if err != nil {
 			fmt.Println(err)
 			ut.Fatal(err)
@@ -139,21 +139,21 @@ func (db DBWrapper) addPlayerStat(action sp.Action) {
 		
 	case "free throw succes":
 		updateSQL := `UPDATE playerStatistic SET freeThrowSuccess = freeThrowSuccess + ?, freeThrowTry = freeThrowTry + ? WHERE id = ?`
-		_, err := db.clientDB.Exec(updateSQL, 1, 1, id)
+		_, err := db.ClientDB.Exec(updateSQL, 1, 1, id)
 		if err != nil {
 			fmt.Println(err)
 			ut.Fatal(err)
 		}
 	case "free throw try":
 		updateSQL := `UPDATE playerStatistic SET freeThrowTry = freeThrowTry + ? WHERE id = ?`
-		_, err := db.clientDB.Exec(updateSQL, 1, id)
+		_, err := db.ClientDB.Exec(updateSQL, 1, id)
 		if err != nil {
 			fmt.Println(err)
 			ut.Fatal(err)
 		}
 	case  "foul":
 		updateSQL := `UPDATE playerStatistic SET foul = foul + ? WHERE id = ?`
-		_, err := db.clientDB.Exec(updateSQL, 1, id)
+		_, err := db.ClientDB.Exec(updateSQL, 1, id)
 		if err != nil {
 			fmt.Println(err)
 			ut.Fatal(err)
@@ -186,7 +186,7 @@ func (db *DBWrapper) addEntryToPerGameTable(action sp.Action) {
 				description STRING,
 				minute INTEGER
 			);`, action.GamePoster)
-		_, err := db.clientDB.Exec(query)
+		_, err := db.ClientDB.Exec(query)
 		if err != nil {
 			ut.Info(err)
 			ut.Fatal(err)
@@ -197,15 +197,43 @@ func (db *DBWrapper) addEntryToPerGameTable(action sp.Action) {
 	query = fmt.Sprintf(`INSERT INTO %s (team, playerName, description, minute) 
 		VALUES ('%s', '%s', '%s', %d);`, action.GamePoster, action.Team, action.PlayerName, action.Description, action.Minute)
 
-	_, err := db.clientDB.Exec(query)
+	_, err := db.ClientDB.Exec(query)
 	if err != nil {
 		ut.Fatal(err)
 	}
 }
 
-func getSQLDB() *sql.DB {
+func (db *DBWrapper) queryGameRecord(gameName string) []sp.Action {
+	// var query string
+	// if !db.cachedTableNames[gameName] {
+
+	// 	query = fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
+	// 			team STRING,
+	// 			playerName STRING,
+	// 			description STRING,
+	// 			minute INTEGER
+	// 		);`, gameName)
+	// 	_, err := db.ClientDB.Exec(query)
+	// 	if err != nil {
+	// 		ut.Info(err)
+	// 		ut.Fatal(err)
+	// 	}
+	// 	db.cachedTableNames[action.GamePoster] = true
+	// }
+
+	// query = fmt.Sprintf(`INSERT INTO %s (team, playerName, description, minute) 
+	// 	VALUES ('%s', '%s', '%s', %d);`, gameName, action.Team, action.PlayerName, action.Description, action.Minute)
+
+	// _, err := db.ClientDB.Exec(query)
+	// if err != nil {
+	// 	ut.Fatal(err)
+	// }
+	return make([]sp.Action, 0)
+}
+
+func getSQLDB(dbName string) *sql.DB {
 	// Open a connection pool to SQLite database
-	db, err := sql.Open("sqlite3", "./games.db")
+	db, err := sql.Open("sqlite3", dbName) //"./games.db")
 	if err != nil {
 		fmt.Println(err)
 		ut.Fatal(err)
