@@ -39,28 +39,20 @@ func (s *GameEventServer) SendGameAction(ctx context.Context, event *pb.Action) 
 }
 
 func (s *GameEventServer) GetGameRecord(ctx context.Context, event *pb.GameTitle) (*pb.Actions, error) {
-	query := fmt.Sprintf(`SELECT * FROM %s;`, event.GamePoster)
 
-	rows, err := s.db.ClientDB.Query(query)
+	spActions, err := s.db.QueryGameHistoric(event.GamePoster)
 	if err != nil {
 		ut.Debug(err)
 		ut.Fatal(err)
 	}
-	defer rows.Close()
-	// Extract Value
 	var actions pb.Actions
-	var team, playerName, description string
-	var minute int32
-	for rows.Next() {
-		if err := rows.Scan(&team, &playerName, &description, &minute); err != nil {
-			ut.Fatal(err)
-		}
+	for _, act := range spActions {
 		actions.Elements = append(actions.Elements, &pb.Action{
-			GamePoster:  event.GamePoster,
-			Team:        team,
-			PlayerName:  playerName,
-			Description: description,
-			Minute:      minute})
+			GamePoster:  act.GamePoster,
+			Team:        act.Team,
+			PlayerName:  act.PlayerName,
+			Description: act.Description,
+			Minute:      act.Minute})
 	}
 
 	return &actions, nil
