@@ -45,6 +45,7 @@ func (s *GameEventServer) GetGameRecord(ctx context.Context, event *pb.GameTitle
 		ut.Debug(err)
 		ut.Fatal(err)
 	}
+	// transform into protobuf messages
 	var actions pb.Actions
 	for _, act := range spActions {
 		actions.Elements = append(actions.Elements, &pb.Action{
