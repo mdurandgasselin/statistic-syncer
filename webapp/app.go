@@ -107,10 +107,86 @@ func endGameAfterNSeconds(n int, game *Game) {
 	}()
 }
 
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "landing.html")
+}
+
+func handleGamesList(w http.ResponseWriter, r *http.Request) {
+	gamesMux.RLock()
+	gamesList := make([]string, 0, len(games))
+	for id := range games {
+		gamesList = append(gamesList, id)
+	}
+	gamesMux.RUnlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(gamesList)
+}
+
+func handleGameView(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	gameID := vars["id"]
+	
+	gamesMux.RLock()
+	_, exists := games[gameID]
+	gamesMux.RUnlock()
+	
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+	http.ServeFile(w, r, "index.html")
+}
+
+func handleGameStream(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	gameID := vars["id"]
+	
+	gamesMux.RLock()
+	game, exists := games[gameID]
+	gamesMux.RUnlock()
+	
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Start game if not started
+	if !game.Started {
+		game.Started = true
+		go startGame(game)
+		endGameAfterNSeconds(15, game)
+	}
+
+	// Stream data
+	for {
+		data := GameData{
+			CurrentTime: time.Now(),
+			GameName:    game.Data.GameName,
+			TeamAScore:  game.Data.TeamAScore,
+			TeamBScore:  game.Data.TeamBScore,
+			Actions:     game.Data.Actions,
+		}
+		
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			log.Println("Error marshaling JSON:", err)
+			continue
+		}
+		
+		fmt.Fprintf(w, "data: %s\n\n", jsonData)
+		w.(http.Flusher).Flush()
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func main() {
 	registry := NewRouterRegistry()
-
-	
 
 	// Initialize games dynamically
 	gamesMux.Lock()
@@ -129,87 +205,11 @@ func main() {
         log.Println("New game 'game3' has been added!")
     }()
 
-	// Root handler
-	registry.RegisterWithMethod("/", "GET", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "landing.html")
-	})
-
-	// Add games list endpoint
-	registry.RegisterWithMethod("/games", "GET", func(w http.ResponseWriter, r *http.Request) {
-		gamesMux.RLock()
-		gamesList := make([]string, 0, len(games))
-		for id := range games {
-			gamesList = append(gamesList, id)
-		}
-		gamesMux.RUnlock()
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(gamesList)
-	})
-
-	// Generic game view handler - Add GET method explicitly
-	registry.RegisterWithMethod("/game/{id}", "GET", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		gameID := vars["id"]
-		
-		gamesMux.RLock()
-		_, exists := games[gameID]
-		gamesMux.RUnlock()
-		
-		if !exists {
-			http.NotFound(w, r)
-			return
-		}
-		http.ServeFile(w, r, "index.html")
-	})
-
-	// Generic stream handler - Add GET method explicitly
-	registry.RegisterWithMethod("/stream/{id}", "GET", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		gameID := vars["id"]
-		
-		gamesMux.RLock()
-		game, exists := games[gameID]
-		gamesMux.RUnlock()
-		
-		if !exists {
-			http.NotFound(w, r)
-			return
-		}
-
-		// Set headers for SSE
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "keep-alive")
-
-		// Start game if not started
-		if !game.Started {
-			game.Started = true
-			go startGame(game)
-			endGameAfterNSeconds(15, game)
-		}
-
-		// Stream data
-		for {
-			data := GameData{
-				CurrentTime: time.Now(),
-				GameName:    game.Data.GameName,
-				TeamAScore:  game.Data.TeamAScore,
-				TeamBScore:  game.Data.TeamBScore,
-				Actions:     game.Data.Actions,
-			}
-			
-			jsonData, err := json.Marshal(data)
-			if err != nil {
-				log.Println("Error marshaling JSON:", err)
-				continue
-			}
-			
-			fmt.Fprintf(w, "data: %s\n\n", jsonData)
-			w.(http.Flusher).Flush()
-			time.Sleep(1 * time.Second)
-		}
-	})
+	// Register routes
+	registry.RegisterWithMethod("/", "GET", handleRoot)
+	registry.RegisterWithMethod("/games", "GET", handleGamesList)
+	registry.RegisterWithMethod("/game/{id}", "GET", handleGameView)
+	registry.RegisterWithMethod("/stream/{id}", "GET", handleGameStream)
 
 	// Start the server
 	server := &http.Server{
