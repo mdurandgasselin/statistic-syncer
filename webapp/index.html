@@ -6,7 +6,15 @@
     <title>Data Stream Example</title>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const eventSource = new EventSource("/stream");
+            // Get the game ID from the URL path (now handles /game/{id} format)
+            const pathParts = window.location.pathname.split('/');
+            const gameId = pathParts[pathParts.length - 1];
+            
+            // Connect to the stream using the game ID
+            const eventSource = new EventSource(`/stream/${gameId}`);
+            
+            document.getElementById("gameTitle").innerText = `Game ${gameId}`;
+            
             eventSource.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 document.getElementById("currentTime").innerText = data.currentTime;
@@ -26,7 +34,7 @@
     </script>
 </head>
 <body>
-    <h1>Data Stream Example</h1>
+    <h1>Data Stream Example - <span id="gameTitle">Loading...</span></h1>
     <div>
         <strong>Current Time:</strong> <span id="currentTime">Loading...</span>
     </div>

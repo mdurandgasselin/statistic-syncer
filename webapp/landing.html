@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Selection</title>
+    <style>
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+    <script>
+        function updateGames() {
+            fetch('/games')
+                .then(response => response.json())
+                .then(games => {
+                    const gamesContainer = document.getElementById("gamesContainer");
+                    gamesContainer.innerHTML = ''; // Clear existing buttons
+                    
+                    games.forEach(gameId => {
+                        const button = document.createElement("button");
+                        button.textContent = `Watch ${gameId}`;
+                        button.onclick = function() {
+                            window.location.href = `/game/${gameId}`;
+                        };
+                        gamesContainer.appendChild(button);
+                    });
+                })
+                .catch(error => console.error('Error fetching games:', error));
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initial load of games
+            updateGames();
+
+            // Poll for updates every 5 seconds
+            setInterval(updateGames, 5000);
+        });
+    </script>
+</head>
+<body>
+    <h1>Available Games</h1>
+    <div id="gamesContainer">
+        <!-- Buttons will be dynamically added here -->
+    </div>
+</body>
+</html>

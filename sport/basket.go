@@ -3,8 +3,9 @@ package sport
 import (
 	"encoding/json"
 	"os"
+	"time"
 
-	ut "sync_score/utils"
+	ut "statistic-syncer/utils"
 )
 
 type Actions []Action
@@ -15,6 +16,20 @@ type Action struct {
 	PlayerName  string `json:"playername"`
 	Description string `json:"description"`
 	Minute      int32  `json:"minute"`
+}
+
+type ScoreRecord struct {
+	GameName string `json:"gameName"`
+	TeamA    string `json:"teamA"`
+	TeamB    string `json:"teamB"`
+	ScoreA   int32  `json:"scoreA"`
+	ScoreB   int32  `json:"scoreB"`
+	// Non exported field
+	LastRead time.Time `json:"-"`
+}
+
+func (s *ScoreRecord) Reset() {
+	s.LastRead = time.Now()
 }
 
 func ReadGameFile(path string) (Actions, error) {
